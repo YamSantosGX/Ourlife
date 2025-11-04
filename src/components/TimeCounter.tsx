@@ -20,7 +20,7 @@ const TimeCounter = () => {
   });
 
   useEffect(() => {
-    const startDate = new Date("2023-09-29T00:00:00");
+    const startDate = new Date("2023-09-06T00:00:00");
 
     const calculateTime = () => {
       const now = new Date();
