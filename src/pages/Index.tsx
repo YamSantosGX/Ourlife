@@ -2,6 +2,7 @@ import Navigation from "@/components/Navigation";
 import TimeCounter from "@/components/TimeCounter";
 import MessageCarousel from "@/components/MessageCarousel";
 import RomanticQuote from "@/components/RomanticQuote";
+import BackgroundMusic from "@/components/BackgroundMusic";
 import heroImage from "@/assets/hero-romantic.jpg";
 import { Heart } from "lucide-react";
 
@@ -43,7 +44,7 @@ const Index = () => {
       <section className="container mx-auto px-4 py-12 md:py-16">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-8 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            Mensagens do Coração
+            Meus encantos para ti
           </h2>
           <MessageCarousel />
         </div>
@@ -53,6 +54,8 @@ const Index = () => {
       <footer className="container mx-auto px-4 py-8">
         <RomanticQuote />
       </footer>
+      
+      <BackgroundMusic />
     </div>
   );
 };

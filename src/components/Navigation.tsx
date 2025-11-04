@@ -32,7 +32,7 @@ const Navigation = () => {
           <Link to="/" className="flex items-center gap-2 elegant-transition hover:scale-105">
             <Heart className="h-6 w-6 text-primary fill-primary" />
             <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              Nosso Amor
+              Yam & Gy
             </span>
           </Link>
 
