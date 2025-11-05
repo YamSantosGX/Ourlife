@@ -9,8 +9,22 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Trash2, LogOut, Upload, Calendar } from "lucide-react";
+import { Trash2, LogOut, Upload, Calendar, MoreVertical, Pencil } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { SignedMediaUrl } from "@/components/SignedMediaUrl";
 
 interface Message {
   id: string;
@@ -29,6 +43,7 @@ interface Memory {
 const Admin = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [messages, setMessages] = useState<Message[]>([]);
   const [memories, setMemories] = useState<Memory[]>([]);
@@ -43,6 +58,12 @@ const Admin = () => {
   const [memoryDate, setMemoryDate] = useState("");
   const [memoryDescription, setMemoryDescription] = useState("");
 
+  // Edit message dialog
+  const [editingMessage, setEditingMessage] = useState<Message | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editMessageDate, setEditMessageDate] = useState("");
+  const [editMessageText, setEditMessageText] = useState("");
+
   useEffect(() => {
     checkAuth();
   }, []);
@@ -53,6 +74,22 @@ const Admin = () => {
       navigate("/login");
       return;
     }
+
+    // Check if user has admin role
+    const { data: roleData, error: roleError } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", session.user.id)
+      .eq("role", "admin")
+      .single();
+
+    if (roleError || !roleData) {
+      toast.error("Acesso negado. Apenas administradores podem acessar esta página.");
+      navigate("/");
+      return;
+    }
+
+    setIsAdmin(true);
     setUser(session.user);
     setLoading(false);
     fetchMessages();
@@ -95,9 +132,12 @@ const Admin = () => {
   const handleAddMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!user) return;
+
     const { error } = await supabase.from("monthly_messages").insert({
       message_date: messageDate,
       message_text: messageText,
+      user_id: user.id,
     });
 
     if (error) {
@@ -108,6 +148,38 @@ const Admin = () => {
     toast.success("Mensagem adicionada com sucesso!");
     setMessageDate("");
     setMessageText("");
+    fetchMessages();
+  };
+
+  const handleEditMessage = (message: Message) => {
+    setEditingMessage(message);
+    setEditMessageDate(message.message_date);
+    setEditMessageText(message.message_text);
+    setEditDialogOpen(true);
+  };
+
+  const handleUpdateMessage = async () => {
+    if (!editingMessage || !editMessageDate || !editMessageText) {
+      toast.error("Por favor, preencha todos os campos");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("monthly_messages")
+      .update({
+        message_date: editMessageDate,
+        message_text: editMessageText,
+      })
+      .eq("id", editingMessage.id);
+
+    if (error) {
+      toast.error("Erro ao atualizar mensagem");
+      return;
+    }
+
+    toast.success("Mensagem atualizada com sucesso!");
+    setEditDialogOpen(false);
+    setEditingMessage(null);
     fetchMessages();
   };
 
@@ -129,7 +201,7 @@ const Admin = () => {
   const handleAddMemory = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!memoryFile) {
+    if (!memoryFile || !user) {
       toast.error("Selecione um arquivo");
       return;
     }
@@ -139,7 +211,7 @@ const Admin = () => {
     try {
       const fileExt = memoryFile.name.split(".").pop();
       const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = fileName;
+      const filePath = `${user.id}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from("memories")
@@ -147,17 +219,14 @@ const Admin = () => {
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from("memories")
-        .getPublicUrl(filePath);
-
       const mediaType = memoryFile.type.startsWith("video/") ? "video" : "photo";
 
       const { error: insertError } = await supabase.from("memories").insert({
-        media_url: publicUrl,
+        media_url: filePath,
         media_type: mediaType,
         special_date: memoryDate || null,
         description: memoryDescription || null,
+        user_id: user.id,
       });
 
       if (insertError) throw insertError;
@@ -177,11 +246,7 @@ const Admin = () => {
 
   const handleDeleteMemory = async (memory: Memory) => {
     try {
-      const fileName = memory.media_url.split("/").pop();
-      
-      if (fileName) {
-        await supabase.storage.from("memories").remove([fileName]);
-      }
+      await supabase.storage.from("memories").remove([memory.media_url]);
 
       const { error } = await supabase
         .from("memories")
@@ -283,13 +348,26 @@ const Admin = () => {
                             </p>
                             <p className="text-foreground italic">"{message.message_text}"</p>
                           </div>
-                          <Button
-                            variant="destructive"
-                            size="icon"
-                            onClick={() => handleDeleteMessage(message.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleEditMessage(message)}>
+                                <Pencil className="h-4 w-4 mr-2" />
+                                Editar
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handleDeleteMessage(message.id)}
+                                className="text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Excluir
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </CardContent>
                     </Card>
@@ -357,19 +435,12 @@ const Admin = () => {
                   {memories.map((memory) => (
                     <Card key={memory.id} className="overflow-hidden bg-card border-border">
                       <div className="relative aspect-square">
-                        {memory.media_type === "photo" ? (
-                          <img
-                            src={memory.media_url}
-                            alt={memory.description || "Memory"}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <video
-                            src={memory.media_url}
-                            className="w-full h-full object-cover"
-                            controls
-                          />
-                        )}
+                        <SignedMediaUrl
+                          path={memory.media_url}
+                          mediaType={memory.media_type}
+                          alt={memory.description || "Memory"}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                       <CardContent className="pt-4 space-y-2">
                         {memory.special_date && (
@@ -401,6 +472,44 @@ const Admin = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Mensagem</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="editMessageDate">Data</Label>
+              <Input
+                id="editMessageDate"
+                type="date"
+                value={editMessageDate}
+                onChange={(e) => setEditMessageDate(e.target.value)}
+                className="bg-input border-border"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="editMessageText">Mensagem</Label>
+              <Textarea
+                id="editMessageText"
+                value={editMessageText}
+                onChange={(e) => setEditMessageText(e.target.value)}
+                rows={4}
+                className="bg-input border-border"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleUpdateMessage}>
+              Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

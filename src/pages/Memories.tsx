@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Calendar, Heart } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { SignedMediaUrl } from "@/components/SignedMediaUrl";
 
 interface Memory {
   id: string;
@@ -93,19 +94,12 @@ const Memories = () => {
                 className="overflow-hidden bg-card border-border romantic-glow hover:scale-105 elegant-transition group"
               >
                 <div className="relative aspect-square overflow-hidden">
-                  {memory.media_type === "photo" ? (
-                    <img
-                      src={memory.media_url}
-                      alt={memory.description || "Memory"}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                  ) : (
-                    <video
-                      src={memory.media_url}
-                      className="w-full h-full object-cover"
-                      controls
-                    />
-                  )}
+                  <SignedMediaUrl
+                    path={memory.media_url}
+                    mediaType={memory.media_type}
+                    alt={memory.description || "Memory"}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
                   <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </div>
 
