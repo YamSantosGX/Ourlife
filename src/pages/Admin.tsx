@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Trash2, LogOut, Upload, Calendar, MoreVertical, Pencil } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
+import { z } from "zod";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,6 +40,19 @@ interface Memory {
   special_date: string | null;
   description: string | null;
 }
+
+// Validation schemas
+const messageSchema = z.object({
+  message_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Data inválida"),
+  message_text: z.string().min(1, "Mensagem não pode estar vazia").max(5000, "Mensagem muito longa (máximo 5000 caracteres)"),
+});
+
+const memorySchema = z.object({
+  description: z.string().max(1000, "Descrição muito longa (máximo 1000 caracteres)").optional(),
+  special_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Data inválida").optional().or(z.literal("")),
+});
+
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -118,6 +132,19 @@ const Admin = () => {
     
     if (!user) return;
 
+    // Validate inputs
+    try {
+      messageSchema.parse({
+        message_date: messageDate,
+        message_text: messageText,
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+        return;
+      }
+    }
+
     const { error } = await supabase.from("monthly_messages").insert({
       message_date: messageDate,
       message_text: messageText,
@@ -146,6 +173,19 @@ const Admin = () => {
     if (!editingMessage || !editMessageDate || !editMessageText) {
       toast.error("Por favor, preencha todos os campos");
       return;
+    }
+
+    // Validate inputs
+    try {
+      messageSchema.parse({
+        message_date: editMessageDate,
+        message_text: editMessageText,
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+        return;
+      }
     }
 
     const { error } = await supabase
@@ -190,6 +230,25 @@ const Admin = () => {
       return;
     }
 
+    // Validate file size
+    if (memoryFile.size > MAX_FILE_SIZE) {
+      toast.error("Arquivo muito grande (máximo 50MB)");
+      return;
+    }
+
+    // Validate inputs
+    try {
+      memorySchema.parse({
+        description: memoryDescription,
+        special_date: memoryDate,
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+        return;
+      }
+    }
+
     setUploading(true);
 
     try {
@@ -221,7 +280,9 @@ const Admin = () => {
       setMemoryDescription("");
       fetchMemories();
     } catch (error) {
-      console.error("Error uploading memory:", error);
+      if (import.meta.env.DEV) {
+        console.error("Error uploading memory:", error);
+      }
       toast.error("Erro ao adicionar memória");
     } finally {
       setUploading(false);
@@ -242,7 +303,9 @@ const Admin = () => {
       toast.success("Memória deletada!");
       fetchMemories();
     } catch (error) {
-      console.error("Error deleting memory:", error);
+      if (import.meta.env.DEV) {
+        console.error("Error deleting memory:", error);
+      }
       toast.error("Erro ao deletar memória");
     }
   };

@@ -34,7 +34,9 @@ const Memories = () => {
 
       setMemories(data || []);
     } catch (error) {
-      console.error("Error fetching memories:", error);
+      if (import.meta.env.DEV) {
+        console.error("Error fetching memories:", error);
+      }
       toast.error("Erro ao carregar memórias");
     } finally {
       setLoading(false);
