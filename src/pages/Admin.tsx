@@ -43,7 +43,6 @@ interface Memory {
 const Admin = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [messages, setMessages] = useState<Message[]>([]);
   const [memories, setMemories] = useState<Memory[]>([]);
@@ -75,21 +74,6 @@ const Admin = () => {
       return;
     }
 
-    // Check if user has admin role
-    const { data: roleData, error: roleError } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", session.user.id)
-      .eq("role", "admin")
-      .single();
-
-    if (roleError || !roleData) {
-      toast.error("Acesso negado. Apenas administradores podem acessar esta página.");
-      navigate("/");
-      return;
-    }
-
-    setIsAdmin(true);
     setUser(session.user);
     setLoading(false);
     fetchMessages();
