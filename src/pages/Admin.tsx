@@ -77,6 +77,9 @@ const Admin = () => {
   const [editMessageDate, setEditMessageDate] = useState("");
   const [editMessageText, setEditMessageText] = useState("");
 
+  // Relationship settings
+  const [relationshipStartDate, setRelationshipStartDate] = useState("");
+
   useEffect(() => {
     checkAuth();
   }, []);
@@ -92,6 +95,7 @@ const Admin = () => {
     setLoading(false);
     fetchMessages();
     fetchMemories();
+    fetchRelationshipSettings();
   };
 
   const handleLogout = async () => {
@@ -310,6 +314,56 @@ const Admin = () => {
     }
   };
 
+  const fetchRelationshipSettings = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from("relationship_settings")
+        .select("start_date")
+        .eq("user_id", user.id)
+        .single();
+
+      if (data && !error) {
+        const date = new Date(data.start_date);
+        setRelationshipStartDate(date.toISOString().split("T")[0]);
+      }
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error("Error fetching relationship settings:", error);
+      }
+    }
+  };
+
+  const handleSaveRelationshipDate = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!user || !relationshipStartDate) {
+      toast.error("Por favor, selecione uma data");
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from("relationship_settings")
+        .upsert({
+          user_id: user.id,
+          start_date: new Date(relationshipStartDate).toISOString(),
+        }, {
+          onConflict: "user_id",
+        });
+
+      if (error) throw error;
+
+      toast.success("Data salva com sucesso!");
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error("Error saving relationship date:", error);
+      }
+      toast.error("Erro ao salvar data");
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -337,9 +391,10 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="messages" className="space-y-6">
-          <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsList className="grid w-full max-w-2xl grid-cols-3">
             <TabsTrigger value="messages">Mensagens</TabsTrigger>
             <TabsTrigger value="memories">Memórias</TabsTrigger>
+            <TabsTrigger value="settings">Configurações</TabsTrigger>
           </TabsList>
 
           <TabsContent value="messages" className="space-y-6">
@@ -516,6 +571,34 @@ const Admin = () => {
                 </div>
               )}
             </div>
+          </TabsContent>
+
+          <TabsContent value="settings" className="space-y-6">
+            <Card className="bg-card border-border romantic-glow">
+              <CardHeader>
+                <CardTitle>Data de Início do Relacionamento</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSaveRelationshipDate} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="relationshipDate">
+                      Adicione a data de início do seu relacionamento:
+                    </Label>
+                    <Input
+                      id="relationshipDate"
+                      type="date"
+                      value={relationshipStartDate}
+                      onChange={(e) => setRelationshipStartDate(e.target.value)}
+                      required
+                      className="bg-input border-border"
+                    />
+                  </div>
+                  <Button type="submit" className="w-full">
+                    Salvar Data
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

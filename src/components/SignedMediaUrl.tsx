@@ -60,6 +60,8 @@ export const SignedMediaUrl = ({ path, mediaType, alt, className }: SignedMediaU
       src={signedUrl}
       className={className}
       controls
+      playsInline
+      preload="metadata"
     />
   );
 };

@@ -32,7 +32,7 @@ const Navigation = () => {
           <Link to="/" className="flex items-center gap-2 elegant-transition hover:scale-105">
             <Heart className="h-6 w-6 text-primary fill-primary" />
             <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              Yam & Gy
+              Love
             </span>
           </Link>
 
@@ -41,10 +41,11 @@ const Navigation = () => {
               asChild
               variant={isActive("/") ? "default" : "ghost"}
               className="elegant-transition"
+              size="sm"
             >
               <Link to="/">
-                <Home className="h-4 w-4 mr-2" />
-                Início
+                <Home className="h-4 w-4 md:mr-2" />
+                <span className="hidden md:inline">Início</span>
               </Link>
             </Button>
 
@@ -52,10 +53,11 @@ const Navigation = () => {
               asChild
               variant={isActive("/memorias") ? "default" : "ghost"}
               className="elegant-transition"
+              size="sm"
             >
               <Link to="/memorias">
-                <Image className="h-4 w-4 mr-2" />
-                Nossas Memórias
+                <Image className="h-4 w-4 md:mr-2" />
+                <span className="hidden md:inline">Nossas Memórias</span>
               </Link>
             </Button>
 
@@ -64,10 +66,11 @@ const Navigation = () => {
                 asChild
                 variant={isActive("/admin") ? "default" : "ghost"}
                 className="elegant-transition"
+                size="sm"
               >
                 <Link to="/admin">
-                  <User className="h-4 w-4 mr-2" />
-                  Admin
+                  <User className="h-4 w-4 md:mr-2" />
+                  <span className="hidden md:inline">Admin</span>
                 </Link>
               </Button>
             ) : (
@@ -75,10 +78,11 @@ const Navigation = () => {
                 asChild
                 variant={isActive("/login") ? "default" : "ghost"}
                 className="elegant-transition"
+                size="sm"
               >
                 <Link to="/login">
-                  <LogIn className="h-4 w-4 mr-2" />
-                  Login
+                  <LogIn className="h-4 w-4 md:mr-2" />
+                  <span className="hidden md:inline">Login</span>
                 </Link>
               </Button>
             )}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TimeUnits {
   years: number;
@@ -18,9 +19,30 @@ const TimeCounter = () => {
     minutes: 0,
     seconds: 0,
   });
+  const [startDate, setStartDate] = useState<Date | null>(null);
 
   useEffect(() => {
-    const startDate = new Date("2023-09-06T00:00:00");
+    const fetchStartDate = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        const { data, error } = await supabase
+          .from("relationship_settings")
+          .select("start_date")
+          .eq("user_id", user.id)
+          .single();
+
+        if (data && !error) {
+          setStartDate(new Date(data.start_date));
+        }
+      }
+    };
+
+    fetchStartDate();
+  }, []);
+
+  useEffect(() => {
+    if (!startDate) return;
 
     const calculateTime = () => {
       const now = new Date();
@@ -60,7 +82,17 @@ const TimeCounter = () => {
     const interval = setInterval(calculateTime, 1000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [startDate]);
+
+  if (!startDate) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-muted-foreground">
+          Configure a data de início do relacionamento no painel Admin
+        </p>
+      </div>
+    );
+  }
 
   const TimeUnit = ({ value, label }: { value: number; label: string }) => (
     <div className="flex flex-col items-center justify-center bg-card border border-border rounded-lg p-4 md:p-6 romantic-glow elegant-transition hover:scale-105">
