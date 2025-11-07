@@ -100,9 +100,8 @@ const Memories = () => {
                     path={memory.media_url}
                     mediaType={memory.media_type}
                     alt={memory.description || "Memory"}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    className="w-full h-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </div>
 
                 {(memory.special_date || memory.description) && (

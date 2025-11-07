@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Heart, Home, Image, LogIn, User } from "lucide-react";
+import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,8 +44,7 @@ const Navigation = () => {
               size="sm"
             >
               <Link to="/">
-                <Home className="h-4 w-4 md:mr-2" />
-                <span className="hidden md:inline">Início</span>
+                Início
               </Link>
             </Button>
 
@@ -56,8 +55,7 @@ const Navigation = () => {
               size="sm"
             >
               <Link to="/memorias">
-                <Image className="h-4 w-4 md:mr-2" />
-                <span className="hidden md:inline">Nossas Memórias</span>
+                Nossas Memórias
               </Link>
             </Button>
 
@@ -69,8 +67,7 @@ const Navigation = () => {
                 size="sm"
               >
                 <Link to="/admin">
-                  <User className="h-4 w-4 md:mr-2" />
-                  <span className="hidden md:inline">Admin</span>
+                  Admin
                 </Link>
               </Button>
             ) : (
@@ -81,8 +78,7 @@ const Navigation = () => {
                 size="sm"
               >
                 <Link to="/login">
-                  <LogIn className="h-4 w-4 md:mr-2" />
-                  <span className="hidden md:inline">Login</span>
+                  Login
                 </Link>
               </Button>
             )}

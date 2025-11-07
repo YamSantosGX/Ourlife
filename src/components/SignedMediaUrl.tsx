@@ -62,6 +62,7 @@ export const SignedMediaUrl = ({ path, mediaType, alt, className }: SignedMediaU
       controls
       playsInline
       preload="metadata"
+      controlsList="nodownload"
     />
   );
 };
