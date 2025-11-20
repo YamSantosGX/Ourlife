@@ -2,7 +2,7 @@ import Navigation from "@/components/Navigation";
 import TimeCounter from "@/components/TimeCounter";
 import MessageCarousel from "@/components/MessageCarousel";
 import RomanticQuote from "@/components/RomanticQuote";
-import BackgroundMusic from "@/components/BackgroundMusic";
+import SpotifyPlayer from "@/components/SpotifyPlayer";
 import heroImage from "@/assets/hero-romantic.jpg";
 import { Heart } from "lucide-react";
 
@@ -51,11 +51,11 @@ const Index = () => {
       </section>
 
       {/* Footer Quote */}
-      <footer className="container mx-auto px-4 py-8">
+      <footer className="container mx-auto px-4 py-8 pb-32">
         <RomanticQuote />
       </footer>
       
-      <BackgroundMusic />
+      <SpotifyPlayer />
     </div>
   );
 };
