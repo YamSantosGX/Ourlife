@@ -2,13 +2,15 @@ import Navigation from "@/components/Navigation";
 import TimeCounter from "@/components/TimeCounter";
 import MessageCarousel from "@/components/MessageCarousel";
 import RomanticQuote from "@/components/RomanticQuote";
-import SpotifyPlayer from "@/components/SpotifyPlayer";
+import BackgroundMusic from "@/components/BackgroundMusic";
+import FloatingHearts from "@/components/FloatingHearts";
 import heroImage from "@/assets/hero-romantic.jpg";
 import { Heart } from "lucide-react";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      <FloatingHearts />
       <Navigation />
 
       {/* Hero Section */}
@@ -51,11 +53,11 @@ const Index = () => {
       </section>
 
       {/* Footer Quote */}
-      <footer className="container mx-auto px-4 py-8 pb-32">
+      <footer className="container mx-auto px-4 py-8">
         <RomanticQuote />
       </footer>
       
-      <SpotifyPlayer />
+      <BackgroundMusic />
     </div>
   );
 };

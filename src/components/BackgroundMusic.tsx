@@ -44,7 +44,7 @@ const BackgroundMusic = () => {
         ref={audioRef}
         loop
         muted={isMuted}
-        src="https://cdn.pixabay.com/audio/2022/03/10/audio_4a8b348f72.mp3"
+        src="/music/piano-beautiful.mp3"
       />
       <Button
         onClick={toggleMute}
