@@ -1,70 +1,78 @@
-# Bem-vindo ao meu projeto Lovable
+# OurLife
 
-## Informações do projeto
+> Um cantinho digital para pessoas apaixonadas — celebre memórias, compartilhe carinho e construa um diário afetivo a dois.
 
-## Como posso editar o código?
+✨ Nosso objetivo
+- Proporcionar um espaço íntimo, seguro e bonito para casais guardarem lembranças, enviarem mensagens e celebrarem datas importantes.
+- Focar em simplicidade de uso, design acolhedor e experiências sentimentais significativas.
 
-Existem várias maneiras de editar seu app/site.
+💡 Para quem é
+- Casais que querem um lugar privado para registrar a história a dois.
+- Pessoas que desejam enviar declarações, cartas e surpresas digitais.
+- Quem busca uma interface leve e emocional para organizar memórias.
 
-**Use o Lovable**
+🧭 Funcionalidades principais
+- Criação e personalização de perfis de casal
+- Feed privado de mensagens, cartas e lembranças
+- Álbuns de fotos e marcação de datas especiais (aniversários, primeiros encontros, viagens)
+- Envio de cartões virtuais e surpresas personalizadas
+- Reações e comentários para interagir com carinho
+- Layout responsivo (desktop e mobile) e foco na experiência do usuário
 
-Basta visitar o [Projeto Lovable](https://lovable.dev/projects/75a3e164-5185-4cdc-a6e2-99d0b01188ec) e iniciar o prompt.
+🎯 Design e experiência
+- Paleta de cores suaves e tipografia acolhedora
+- Navegação clara com foco nas memórias mais importantes
+- Componentes pensados para emoções: bilhetes, álbuns, linhas do tempo
 
-As alterações feitas pelo Lovable serão automaticamente enviadas para este repositório.
-
-**Use sua IDE preferida**
-
-Se você quiser trabalhar localmente usando sua própria IDE, pode clonar este repositório e enviar as alterações. As alterações enviadas também serão refletidas no Lovable.
-
-O único requisito é ter o Node.js e o npm instalados - [instale com nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Siga estes passos:
-
-```sh
-# Passo 1: Clone o repositório usando a URL Git do projeto.
-
-git clone <SUA_URL_GIT>
-
-# Passo 2: Navegue até o diretório do projeto.
-
-cd <NOME_DO_SEU_PROJETO>
-
-# Passo 3: Instale as dependências necessárias.
-
-npm i
-
-# Passo 4: Inicie o servidor de desenvolvimento com recarregamento automático e pré-visualização instantânea.
-
-npm run dev
-
+🚀 Comece rápido
+1. Clone o repositório:
+```bash
+git clone https://github.com/YamSantosGX/ourlife.git
+cd ourlife
 ```
 
-**Edite um arquivo diretamente no GitHub**
+2. Instale dependências (exemplo):
+```bash
+npm install
+# ou
+yarn install
+```
 
-- Navegue até o(s) arquivo(s) desejado(s).
+3. Rode em modo desenvolvimento:
+```bash
+npm run dev
+# ou
+yarn dev
+```
 
-- Clique no botão "Editar" (ícone de lápis) no canto superior direito da visualização do arquivo.
+4. Abra no navegador:
+- http://localhost:3000 (ou a porta definida no projeto)
 
-- Faça suas alterações e confirme-as.
+(Se sua stack for diferente, troque os comandos acima pelos específicos do projeto.)
 
-**Use o GitHub Codespaces**
+🛠️ Tecnologias (preencha conforme o projeto)
+- Frontend: React / Vue / Svelte / outro
+- Backend: Node.js / Rails / Django / outro
+- Banco de dados: PostgreSQL / MongoDB / outro
+- Deploy recomendado: Vercel / Netlify / Heroku
 
-- Navegue até a página principal do seu repositório.
+📸 Capturas e exemplos
+- Insira aqui imagens ou GIFs rápidos que mostrem:
+  - Página inicial do casal
+  - Feed de lembranças
+  - Visualização de álbum de fotos
+  - Tela de envio de cartão/surpresa
 
-- Clique no botão "Código" (botão verde) no canto superior direito.
+Conselho: imagens destacam muito o apelo emocional do projeto — inclua 2–3 screenshots com legendas curtas.
 
-- Selecione a aba "Codespaces".
+🤝 Como contribuir
+- Abra uma issue descrevendo a sugestão ou bug.
+- Faça fork e crie uma branch: feat/nome-da-feature ou fix/descrição.
+- Envie um pull request com uma descrição clara das mudanças.
+- Para mudanças de design, prefira abrir uma issue antes para alinharmos a estética afetiva.
 
-- Clique em "Novo codespace" para iniciar um novo ambiente Codespace.
+📬 Contato
+- Autor: @YamSantosGX — https://github.com/YamSantosGX
+---
 
-- Edite os arquivos diretamente no Codespace e faça o commit e o push das suas alterações quando terminar.
-
-## Quais tecnologias são usadas neste projeto?
-
-Este projeto foi desenvolvido com:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Obrigado por cuidar das memórias — que o OurLife seja um espaço para celebrar o amor, com simplicidade e delicadeza.
