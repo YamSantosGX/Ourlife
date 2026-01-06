@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import PageBackground from "@/components/PageBackground";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -77,8 +78,9 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <Card className="w-full max-w-md bg-card border-border romantic-glow">
+    <PageBackground>
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <Card className="w-full max-w-md bg-card/90 backdrop-blur-sm border-border romantic-glow">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <Heart className="h-12 w-12 text-primary fill-primary animate-pulse" />
@@ -146,8 +148,9 @@ const Login = () => {
             </div>
           </form>
         </CardContent>
-      </Card>
-    </div>
+        </Card>
+      </div>
+    </PageBackground>
   );
 };
 

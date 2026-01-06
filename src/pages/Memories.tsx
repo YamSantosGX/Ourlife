@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Navigation from "@/components/Navigation";
+import PageBackground from "@/components/PageBackground";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Calendar, Heart } from "lucide-react";
@@ -53,7 +54,7 @@ const Memories = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <PageBackground>
       <Navigation />
 
       <div className="container mx-auto px-4 py-12">
@@ -124,7 +125,7 @@ const Memories = () => {
           </div>
         )}
       </div>
-    </div>
+    </PageBackground>
   );
 };
 
