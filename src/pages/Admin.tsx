@@ -41,6 +41,14 @@ interface Memory {
   description: string | null;
 }
 
+interface Milestone {
+  id: string;
+  title: string;
+  description: string | null;
+  milestone_date: string;
+  media_url: string;
+}
+
 // Validation schemas
 const messageSchema = z.object({
   message_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Data inválida"),
@@ -60,6 +68,7 @@ const Admin = () => {
   const [loading, setLoading] = useState(true);
   const [messages, setMessages] = useState<Message[]>([]);
   const [memories, setMemories] = useState<Memory[]>([]);
+  const [milestones, setMilestones] = useState<Milestone[]>([]);
 
   // Message form
   const [messageDate, setMessageDate] = useState("");
@@ -76,6 +85,13 @@ const Admin = () => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editMessageDate, setEditMessageDate] = useState("");
   const [editMessageText, setEditMessageText] = useState("");
+
+  // Timeline form
+  const [milestoneFile, setMilestoneFile] = useState<File | null>(null);
+  const [milestoneTitle, setMilestoneTitle] = useState("");
+  const [milestoneDate, setMilestoneDate] = useState("");
+  const [milestoneDescription, setMilestoneDescription] = useState("");
+  const [uploadingMilestone, setUploadingMilestone] = useState(false);
 
   // Relationship settings
   const [relationshipStartDate, setRelationshipStartDate] = useState("");
@@ -95,6 +111,7 @@ const Admin = () => {
     setLoading(false);
     fetchMessages();
     fetchMemories();
+    fetchMilestones();
     fetchRelationshipSettings();
   };
 
@@ -129,6 +146,20 @@ const Admin = () => {
     }
 
     setMemories(data || []);
+  };
+
+  const fetchMilestones = async () => {
+    const { data, error } = await supabase
+      .from("timeline_milestones")
+      .select("*")
+      .order("milestone_date", { ascending: true });
+
+    if (error) {
+      toast.error("Erro ao carregar marcos da timeline");
+      return;
+    }
+
+    setMilestones(data || []);
   };
 
   const handleAddMessage = async (e: React.FormEvent) => {
@@ -314,6 +345,79 @@ const Admin = () => {
     }
   };
 
+  const handleAddMilestone = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!milestoneFile || !user || !milestoneTitle || !milestoneDate) {
+      toast.error("Preencha todos os campos obrigatórios");
+      return;
+    }
+
+    if (milestoneFile.size > MAX_FILE_SIZE) {
+      toast.error("Arquivo muito grande (máximo 50MB)");
+      return;
+    }
+
+    setUploadingMilestone(true);
+
+    try {
+      const fileExt = milestoneFile.name.split(".").pop();
+      const fileName = `milestone_${Math.random()}.${fileExt}`;
+      const filePath = `${user.id}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("memories")
+        .upload(filePath, milestoneFile);
+
+      if (uploadError) throw uploadError;
+
+      const { error: insertError } = await supabase.from("timeline_milestones").insert({
+        title: milestoneTitle,
+        description: milestoneDescription || null,
+        milestone_date: milestoneDate,
+        media_url: filePath,
+        user_id: user.id,
+      });
+
+      if (insertError) throw insertError;
+
+      toast.success("Marco adicionado com sucesso!");
+      setMilestoneFile(null);
+      setMilestoneTitle("");
+      setMilestoneDate("");
+      setMilestoneDescription("");
+      fetchMilestones();
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error("Error uploading milestone:", error);
+      }
+      toast.error("Erro ao adicionar marco");
+    } finally {
+      setUploadingMilestone(false);
+    }
+  };
+
+  const handleDeleteMilestone = async (milestone: Milestone) => {
+    try {
+      await supabase.storage.from("memories").remove([milestone.media_url]);
+
+      const { error } = await supabase
+        .from("timeline_milestones")
+        .delete()
+        .eq("id", milestone.id);
+
+      if (error) throw error;
+
+      toast.success("Marco deletado!");
+      fetchMilestones();
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error("Error deleting milestone:", error);
+      }
+      toast.error("Erro ao deletar marco");
+    }
+  };
+
   const fetchRelationshipSettings = async () => {
     if (!user) return;
 
@@ -391,9 +495,10 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="messages" className="space-y-6">
-          <TabsList className="grid w-full max-w-2xl grid-cols-3">
+          <TabsList className="grid w-full max-w-3xl grid-cols-4">
             <TabsTrigger value="messages">Mensagens</TabsTrigger>
             <TabsTrigger value="memories">Memórias</TabsTrigger>
+            <TabsTrigger value="timeline">Timeline</TabsTrigger>
             <TabsTrigger value="settings">Configurações</TabsTrigger>
           </TabsList>
 
@@ -561,6 +666,111 @@ const Admin = () => {
                           size="sm"
                           className="w-full"
                           onClick={() => handleDeleteMemory(memory)}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Deletar
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="timeline" className="space-y-6">
+            <Card className="bg-card border-border romantic-glow">
+              <CardHeader>
+                <CardTitle>Adicionar Marco da Timeline</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleAddMilestone} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="milestoneTitle">Título *</Label>
+                    <Input
+                      id="milestoneTitle"
+                      value={milestoneTitle}
+                      onChange={(e) => setMilestoneTitle(e.target.value)}
+                      required
+                      placeholder="Ex: Primeiro beijo"
+                      className="bg-input border-border"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="milestoneDate">Data do Marco *</Label>
+                    <Input
+                      id="milestoneDate"
+                      type="date"
+                      value={milestoneDate}
+                      onChange={(e) => setMilestoneDate(e.target.value)}
+                      required
+                      className="bg-input border-border"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="milestoneFile">Imagem *</Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        id="milestoneFile"
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => setMilestoneFile(e.target.files?.[0] || null)}
+                        required
+                        className="bg-input border-border"
+                      />
+                      <Upload className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="milestoneDescription">Descrição (opcional)</Label>
+                    <Textarea
+                      id="milestoneDescription"
+                      value={milestoneDescription}
+                      onChange={(e) => setMilestoneDescription(e.target.value)}
+                      rows={3}
+                      placeholder="Descreva este momento especial..."
+                      className="bg-input border-border"
+                    />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={uploadingMilestone}>
+                    {uploadingMilestone ? "Enviando..." : "Adicionar Marco"}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold">Marcos Cadastrados</h2>
+              {milestones.length === 0 ? (
+                <p className="text-muted-foreground">Nenhum marco cadastrado.</p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {milestones.map((milestone) => (
+                    <Card key={milestone.id} className="overflow-hidden bg-card border-border">
+                      <div className="relative aspect-[4/3]">
+                        <SignedMediaUrl
+                          path={milestone.media_url}
+                          mediaType="photo"
+                          alt={milestone.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <CardContent className="pt-4 space-y-2">
+                        <div className="flex items-center gap-2 text-sm text-secondary">
+                          <Calendar className="h-4 w-4" />
+                          <span>
+                            {new Date(milestone.milestone_date).toLocaleDateString("pt-BR")}
+                          </span>
+                        </div>
+                        <h3 className="font-semibold text-foreground">{milestone.title}</h3>
+                        {milestone.description && (
+                          <p className="text-sm text-muted-foreground">{milestone.description}</p>
+                        )}
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="w-full"
+                          onClick={() => handleDeleteMilestone(milestone)}
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
                           Deletar
