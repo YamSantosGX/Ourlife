@@ -4,6 +4,7 @@ import MessageCarousel from "@/components/MessageCarousel";
 import RomanticQuote from "@/components/RomanticQuote";
 import BackgroundMusic from "@/components/BackgroundMusic";
 import FloatingHearts from "@/components/FloatingHearts";
+import TimelineCarousel from "@/components/TimelineCarousel";
 import heroImage from "@/assets/hero-romantic.jpg";
 import { Heart } from "lucide-react";
 
@@ -50,6 +51,11 @@ const Index = () => {
           </h2>
           <MessageCarousel />
         </div>
+      </section>
+
+      {/* Timeline Section */}
+      <section className="container mx-auto px-4 py-12 md:py-16">
+        <TimelineCarousel />
       </section>
 
       {/* Footer Quote */}

@@ -98,6 +98,39 @@ export type Database = {
         }
         Relationships: []
       }
+      timeline_milestones: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          media_url: string
+          milestone_date: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          media_url: string
+          milestone_date: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          media_url?: string
+          milestone_date?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
