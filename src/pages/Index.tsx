@@ -5,12 +5,13 @@ import RomanticQuote from "@/components/RomanticQuote";
 import BackgroundMusic from "@/components/BackgroundMusic";
 import FloatingHearts from "@/components/FloatingHearts";
 import TimelineCarousel from "@/components/TimelineCarousel";
+import PageBackground from "@/components/PageBackground";
 import heroImage from "@/assets/hero-romantic.jpg";
 import { Heart } from "lucide-react";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background relative">
+    <PageBackground>
       <FloatingHearts />
       <Navigation />
 
@@ -64,7 +65,7 @@ const Index = () => {
       </footer>
       
       <BackgroundMusic />
-    </div>
+    </PageBackground>
   );
 };
 
