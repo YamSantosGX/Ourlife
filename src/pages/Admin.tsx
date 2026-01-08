@@ -44,10 +44,14 @@ interface Memory {
 
 interface Milestone {
   id: string;
-  title: string;
-  description: string | null;
-  milestone_date: string;
+  title: string | null;
   media_url: string;
+}
+
+interface PartnerMessage {
+  id: string;
+  message_date: string;
+  message_text: string;
 }
 
 // Validation schemas
@@ -68,6 +72,7 @@ const Admin = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [partnerMessages, setPartnerMessages] = useState<PartnerMessage[]>([]);
   const [memories, setMemories] = useState<Memory[]>([]);
   const [milestones, setMilestones] = useState<Milestone[]>([]);
 
@@ -90,8 +95,10 @@ const Admin = () => {
   // Timeline form
   const [milestoneFile, setMilestoneFile] = useState<File | null>(null);
   const [milestoneTitle, setMilestoneTitle] = useState("");
-  const [milestoneDate, setMilestoneDate] = useState("");
-  const [milestoneDescription, setMilestoneDescription] = useState("");
+
+  // Partner message form
+  const [partnerMessageDate, setPartnerMessageDate] = useState("");
+  const [partnerMessageText, setPartnerMessageText] = useState("");
   const [uploadingMilestone, setUploadingMilestone] = useState(false);
 
   // Relationship settings
@@ -111,6 +118,7 @@ const Admin = () => {
     setUser(session.user);
     setLoading(false);
     fetchMessages();
+    fetchPartnerMessages();
     fetchMemories();
     fetchMilestones();
     fetchRelationshipSettings();
@@ -135,6 +143,20 @@ const Admin = () => {
     setMessages(data || []);
   };
 
+  const fetchPartnerMessages = async () => {
+    const { data, error } = await supabase
+      .from("partner_messages")
+      .select("*")
+      .order("message_date", { ascending: true });
+
+    if (error) {
+      toast.error("Erro ao carregar mensagens dela");
+      return;
+    }
+
+    setPartnerMessages(data || []);
+  };
+
   const fetchMemories = async () => {
     const { data, error } = await supabase
       .from("memories")
@@ -152,8 +174,8 @@ const Admin = () => {
   const fetchMilestones = async () => {
     const { data, error } = await supabase
       .from("timeline_milestones")
-      .select("*")
-      .order("milestone_date", { ascending: true });
+      .select("id, title, media_url")
+      .order("created_at", { ascending: true });
 
     if (error) {
       toast.error("Erro ao carregar marcos da timeline");
@@ -161,6 +183,55 @@ const Admin = () => {
     }
 
     setMilestones(data || []);
+  };
+
+  const handleAddPartnerMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!user) return;
+
+    try {
+      messageSchema.parse({
+        message_date: partnerMessageDate,
+        message_text: partnerMessageText,
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+        return;
+      }
+    }
+
+    const { error } = await supabase.from("partner_messages").insert({
+      message_date: partnerMessageDate,
+      message_text: partnerMessageText,
+      user_id: user.id,
+    });
+
+    if (error) {
+      toast.error("Erro ao adicionar mensagem dela");
+      return;
+    }
+
+    toast.success("Mensagem dela adicionada com sucesso!");
+    setPartnerMessageDate("");
+    setPartnerMessageText("");
+    fetchPartnerMessages();
+  };
+
+  const handleDeletePartnerMessage = async (id: string) => {
+    const { error } = await supabase
+      .from("partner_messages")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      toast.error("Erro ao deletar mensagem");
+      return;
+    }
+
+    toast.success("Mensagem deletada!");
+    fetchPartnerMessages();
   };
 
   const handleAddMessage = async (e: React.FormEvent) => {
@@ -349,8 +420,8 @@ const Admin = () => {
   const handleAddMilestone = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!milestoneFile || !user || !milestoneTitle || !milestoneDate) {
-      toast.error("Preencha todos os campos obrigatórios");
+    if (!milestoneFile || !user) {
+      toast.error("Selecione uma imagem");
       return;
     }
 
@@ -373,9 +444,7 @@ const Admin = () => {
       if (uploadError) throw uploadError;
 
       const { error: insertError } = await supabase.from("timeline_milestones").insert({
-        title: milestoneTitle,
-        description: milestoneDescription || null,
-        milestone_date: milestoneDate,
+        title: milestoneTitle || null,
         media_url: filePath,
         user_id: user.id,
       });
@@ -385,8 +454,6 @@ const Admin = () => {
       toast.success("Marco adicionado com sucesso!");
       setMilestoneFile(null);
       setMilestoneTitle("");
-      setMilestoneDate("");
-      setMilestoneDescription("");
       fetchMilestones();
     } catch (error) {
       if (import.meta.env.DEV) {
@@ -506,6 +573,7 @@ const Admin = () => {
           </TabsList>
 
           <TabsContent value="messages" className="space-y-6">
+            {/* Minhas mensagens */}
             <Card className="bg-card border-border romantic-glow">
               <CardHeader>
                 <CardTitle>Adicionar Nova Mensagem</CardTitle>
@@ -542,8 +610,46 @@ const Admin = () => {
               </CardContent>
             </Card>
 
+            {/* Mensagens dela */}
+            <Card className="bg-card border-border romantic-glow">
+              <CardHeader>
+                <CardTitle>Adicionar Mensagem Dela</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleAddPartnerMessage} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="partnerMessageDate">Data</Label>
+                    <Input
+                      id="partnerMessageDate"
+                      type="date"
+                      value={partnerMessageDate}
+                      onChange={(e) => setPartnerMessageDate(e.target.value)}
+                      required
+                      className="bg-input border-border"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="partnerMessageText">Mensagem</Label>
+                    <Textarea
+                      id="partnerMessageText"
+                      value={partnerMessageText}
+                      onChange={(e) => setPartnerMessageText(e.target.value)}
+                      required
+                      rows={4}
+                      placeholder="Escreva a mensagem que você recebeu..."
+                      className="bg-input border-border"
+                    />
+                  </div>
+                  <Button type="submit" className="w-full" variant="secondary">
+                    Adicionar Mensagem Dela
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+
+            {/* Minhas mensagens cadastradas */}
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold">Mensagens Cadastradas</h2>
+              <h2 className="text-2xl font-bold">Minhas Mensagens</h2>
               {messages.length === 0 ? (
                 <p className="text-muted-foreground">Nenhuma mensagem cadastrada.</p>
               ) : (
@@ -578,6 +684,39 @@ const Admin = () => {
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Mensagens dela cadastradas */}
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold">Mensagens Dela</h2>
+              {partnerMessages.length === 0 ? (
+                <p className="text-muted-foreground">Nenhuma mensagem dela cadastrada.</p>
+              ) : (
+                <div className="grid gap-4">
+                  {partnerMessages.map((message) => (
+                    <Card key={message.id} className="bg-card border-border border-l-4 border-l-secondary">
+                      <CardContent className="pt-6">
+                        <div className="flex justify-between items-start gap-4">
+                          <div className="flex-1">
+                            <p className="text-sm text-secondary mb-2">
+                              {new Date(message.message_date).toLocaleDateString("pt-BR")}
+                            </p>
+                            <p className="text-foreground italic">"{message.message_text}"</p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeletePartnerMessage(message.id)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -689,29 +828,7 @@ const Admin = () => {
               <CardContent>
                 <form onSubmit={handleAddMilestone} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="milestoneTitle">Título *</Label>
-                    <Input
-                      id="milestoneTitle"
-                      value={milestoneTitle}
-                      onChange={(e) => setMilestoneTitle(e.target.value)}
-                      required
-                      placeholder="Ex: Primeiro beijo"
-                      className="bg-input border-border"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="milestoneDate">Data do Marco *</Label>
-                    <Input
-                      id="milestoneDate"
-                      type="date"
-                      value={milestoneDate}
-                      onChange={(e) => setMilestoneDate(e.target.value)}
-                      required
-                      className="bg-input border-border"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="milestoneFile">Imagem *</Label>
+                    <Label htmlFor="milestoneFile">Imagem (formato 9:16 recomendado) *</Label>
                     <div className="flex items-center gap-2">
                       <Input
                         id="milestoneFile"
@@ -725,13 +842,12 @@ const Admin = () => {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="milestoneDescription">Descrição (opcional)</Label>
-                    <Textarea
-                      id="milestoneDescription"
-                      value={milestoneDescription}
-                      onChange={(e) => setMilestoneDescription(e.target.value)}
-                      rows={3}
-                      placeholder="Descreva este momento especial..."
+                    <Label htmlFor="milestoneTitle">Título (opcional)</Label>
+                    <Input
+                      id="milestoneTitle"
+                      value={milestoneTitle}
+                      onChange={(e) => setMilestoneTitle(e.target.value)}
+                      placeholder="Ex: Primeiro beijo"
                       className="bg-input border-border"
                     />
                   </div>
@@ -747,27 +863,20 @@ const Admin = () => {
               {milestones.length === 0 ? (
                 <p className="text-muted-foreground">Nenhum marco cadastrado.</p>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {milestones.map((milestone) => (
                     <Card key={milestone.id} className="overflow-hidden bg-card border-border">
-                      <div className="relative aspect-[4/3]">
+                      <div className="relative aspect-[9/16]">
                         <SignedMediaUrl
                           path={milestone.media_url}
                           mediaType="photo"
-                          alt={milestone.title}
+                          alt={milestone.title || "Timeline"}
                           className="w-full h-full object-cover"
                         />
                       </div>
                       <CardContent className="pt-4 space-y-2">
-                        <div className="flex items-center gap-2 text-sm text-secondary">
-                          <Calendar className="h-4 w-4" />
-                          <span>
-                            {new Date(milestone.milestone_date).toLocaleDateString("pt-BR")}
-                          </span>
-                        </div>
-                        <h3 className="font-semibold text-foreground">{milestone.title}</h3>
-                        {milestone.description && (
-                          <p className="text-sm text-muted-foreground">{milestone.description}</p>
+                        {milestone.title && (
+                          <h3 className="font-semibold text-foreground text-sm">{milestone.title}</h3>
                         )}
                         <Button
                           variant="destructive"
