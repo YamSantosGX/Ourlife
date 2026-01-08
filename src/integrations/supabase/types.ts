@@ -74,6 +74,33 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_messages: {
+        Row: {
+          created_at: string
+          id: string
+          message_date: string
+          message_text: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message_date: string
+          message_text: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message_date?: string
+          message_text?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       relationship_settings: {
         Row: {
           created_at: string
@@ -104,8 +131,8 @@ export type Database = {
           description: string | null
           id: string
           media_url: string
-          milestone_date: string
-          title: string
+          milestone_date: string | null
+          title: string | null
           updated_at: string
           user_id: string
         }
@@ -114,8 +141,8 @@ export type Database = {
           description?: string | null
           id?: string
           media_url: string
-          milestone_date: string
-          title: string
+          milestone_date?: string | null
+          title?: string | null
           updated_at?: string
           user_id: string
         }
@@ -124,8 +151,8 @@ export type Database = {
           description?: string | null
           id?: string
           media_url?: string
-          milestone_date?: string
-          title?: string
+          milestone_date?: string | null
+          title?: string | null
           updated_at?: string
           user_id?: string
         }

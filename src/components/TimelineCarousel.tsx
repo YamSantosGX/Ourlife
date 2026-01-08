@@ -6,17 +6,13 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 import { Card, CardContent } from "@/components/ui/card";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { Heart, Calendar } from "lucide-react";
+import { Heart } from "lucide-react";
 import Autoplay from "embla-carousel-autoplay";
 import { SignedMediaUrl } from "@/components/SignedMediaUrl";
 
 interface Milestone {
   id: string;
-  title: string;
-  description: string | null;
-  milestone_date: string;
+  title: string | null;
   media_url: string;
 }
 
@@ -31,8 +27,8 @@ const TimelineCarousel = () => {
   const fetchMilestones = async () => {
     const { data, error } = await supabase
       .from("timeline_milestones")
-      .select("*")
-      .order("milestone_date", { ascending: true });
+      .select("id, title, media_url")
+      .order("created_at", { ascending: true });
 
     if (!error && data) {
       setMilestones(data);
@@ -78,33 +74,23 @@ const TimelineCarousel = () => {
       >
         <CarouselContent className="-ml-2 md:-ml-4">
           {milestones.map((milestone) => (
-            <CarouselItem key={milestone.id} className="pl-2 md:pl-4 basis-full md:basis-1/2 lg:basis-1/3">
+            <CarouselItem key={milestone.id} className="pl-2 md:pl-4 basis-[70%] md:basis-1/3 lg:basis-1/4">
               <Card className="bg-card/80 backdrop-blur-sm border-border/50 overflow-hidden romantic-glow">
-                <div className="aspect-[4/3] relative overflow-hidden">
+                <div className="aspect-[9/16] relative overflow-hidden">
                   <SignedMediaUrl
                     path={milestone.media_url}
                     mediaType="photo"
-                    alt={milestone.title}
+                    alt={milestone.title || "Timeline"}
                     className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
-                </div>
-                <CardContent className="p-4 relative">
-                  <div className="flex items-center gap-2 text-secondary text-sm mb-2">
-                    <Calendar className="h-4 w-4" />
-                    <span>
-                      {format(new Date(milestone.milestone_date), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
-                    </span>
-                  </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-1">
-                    {milestone.title}
-                  </h3>
-                  {milestone.description && (
-                    <p className="text-muted-foreground text-sm line-clamp-2">
-                      {milestone.description}
-                    </p>
+                  {milestone.title && (
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/90 to-transparent p-4">
+                      <h3 className="text-lg font-semibold text-secondary italic text-center">
+                        {milestone.title}
+                      </h3>
+                    </div>
                   )}
-                </CardContent>
+                </div>
               </Card>
             </CarouselItem>
           ))}
