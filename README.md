@@ -24,37 +24,13 @@
 - Navegação clara com foco nas memórias mais importantes
 - Componentes pensados para emoções: bilhetes, álbuns, linhas do tempo
 
-🚀 Comece rápido
-1. Clone o repositório:
-```bash
-git clone https://github.com/YamSantosGX/ourlife.git
-cd ourlife
+
 ```
-
-2. Instale dependências (exemplo):
-```bash
-npm install
-# ou
-yarn install
-```
-
-3. Rode em modo desenvolvimento:
-```bash
-npm run dev
-# ou
-yarn dev
-```
-
-4. Abra no navegador:
-- http://localhost:3000 (ou a porta definida no projeto)
-
-(Se sua stack for diferente, troque os comandos acima pelos específicos do projeto.)
-
-🛠️ Tecnologias (preencha conforme o projeto)
-- Frontend: React / Vue / Svelte / outro
-- Backend: Node.js / Rails / Django / outro
-- Banco de dados: PostgreSQL / MongoDB / outro
-- Deploy recomendado: Vercel / Netlify / Heroku
+🛠️ Tecnologias
+- Frontend: React / Vue / outros
+- Backend: Node.js
+- Banco de dados: PostgreSQL
+- Deploy recomendado: Vercel
 
 📸 Capturas e exemplos
 - Insira aqui imagens ou GIFs rápidos que mostrem:
@@ -71,8 +47,6 @@ Conselho: imagens destacam muito o apelo emocional do projeto — inclua 2–3 s
 - Envie um pull request com uma descrição clara das mudanças.
 - Para mudanças de design, prefira abrir uma issue antes para alinharmos a estética afetiva.
 
-📬 Contato
-- Autor: @YamSantosGX — https://github.com/YamSantosGX
 ---
 
 Obrigado por cuidar das memórias — que o OurLife seja um espaço para celebrar o amor, com simplicidade e delicadeza.
